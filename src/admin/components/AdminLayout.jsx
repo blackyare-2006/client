@@ -1,13 +1,14 @@
 // client/src/admin/components/AdminLayout.jsx
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Stethoscope, CalendarCheck, Building2, UserRound, LogOut, Menu, X, ShieldCheck } from 'lucide-react';
+import { Stethoscope, CalendarCheck, Building2, UserRound, LogOut, Menu, ShieldCheck, Users } from 'lucide-react';
 import { useAdminAuth } from '../context/AdminAuthContext';
 
 const sidebarLinks = [
   { to: '/admin/dashboard/bookings', icon: CalendarCheck, label: 'Bookings' },
   { to: '/admin/dashboard/hospitals', icon: Building2, label: 'Hospitals' },
   { to: '/admin/dashboard/doctors', icon: UserRound, label: 'Doctors' },
+  { to: '/admin/dashboard/users', icon: Users, label: 'Patients' },
 ];
 
 export default function AdminLayout({ children }) {

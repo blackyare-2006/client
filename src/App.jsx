@@ -27,6 +27,7 @@ import AdminLogin from './admin/pages/AdminLogin';
 import AdminBookings from './admin/pages/AdminBookings';
 import AdminHospitals from './admin/pages/AdminHospitals';
 import AdminDoctors from './admin/pages/AdminDoctors';
+import AdminUsers from './admin/pages/AdminUsers';
 
 function App() {
   return (
@@ -68,6 +69,7 @@ function App() {
                     <Route path="bookings" element={<AdminBookings />} />
                     <Route path="hospitals" element={<AdminHospitals />} />
                     <Route path="doctors" element={<AdminDoctors />} />
+                    <Route path="users" element={<AdminUsers />} />
                   </Routes>
                 </AdminLayout>
               </ProtectedAdminRoute>
