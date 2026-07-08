@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Stethoscope, Building2, Star, Award } from 'lucide-react';
+import { Stethoscope, Building2, Star, Award, UserRound } from 'lucide-react';
 
-const avatars = [
+// Fallback avatars — only used when a doctor has NO image
+const fallbackAvatars = [
   'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80',
   'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80',
   'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80',
@@ -10,16 +11,31 @@ const avatars = [
   'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&q=80',
 ];
 
-export default function DoctorCard({ doctor, index = 0 }) {
+// Stable fallback using doctor ID — NEVER changes on re-render
+function getStableAvatar(doctor) {
+  if (doctor.image && doctor.image.trim()) return doctor.image;
+  const numericId = typeof doctor.id === 'number'
+    ? doctor.id
+    : parseInt((doctor._id || '0').replace(/\D/g, '').slice(-4), 10) || 0;
+  return fallbackAvatars[numericId % fallbackAvatars.length];
+}
+
+export default function DoctorCard({ doctor }) {
   const id = doctor._id || doctor.id;
   const hospitalName = doctor.hospitalId?.name || doctor.clinic_name || '';
-  const avatar = avatars[index % avatars.length];
+  const avatar = getStableAvatar(doctor);
 
   return (
     <Link to={`/doctors/${id}`}
       className="group flex gap-4 bg-white rounded-2xl border border-teal-900/10 p-4 hover:border-teal-900/25 hover:shadow-lg hover:shadow-teal-900/5 transition-all">
       <div className="relative w-16 h-16 rounded-full overflow-hidden bg-teal-100 shrink-0">
-        <img src={avatar} alt={doctor.name} className="w-full h-full object-cover" />
+        {avatar ? (
+          <img src={avatar} alt={doctor.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <UserRound size={24} className="text-teal-400" />
+          </div>
+        )}
         {doctor.award && (
           <span className="absolute -bottom-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-gold-600 text-teal-950 ring-2 ring-white">
             <Award size={11} />

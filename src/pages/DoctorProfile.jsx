@@ -1,23 +1,34 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Stethoscope, Building2, MapPin, ArrowLeft, Star, Award, Briefcase, Loader2 } from 'lucide-react';
+import { Stethoscope, Building2, MapPin, ArrowLeft, Star, Award, Briefcase, Loader2, UserRound } from 'lucide-react';
 import { getDoctorById } from '../services/api';
-import { getDoctorById as getSampleDoctor, getAvatarForIndex, awardDefinitions } from '../data/doctors';
+import { getDoctorById as getSampleDoctor, awardDefinitions } from '../data/doctors';
 import { getHospitalById as getSampleHospital } from '../data/hospitals';
 import BookingForm from '../components/BookingForm';
 
 const dayLabels = { Sun:'Sunday', Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday', Sat:'Saturday' };
 
-const avatars = [
+const fallbackAvatars = [
   'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80',
   'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80',
   'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80',
   'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80',
   'https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80',
+  'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&q=80',
 ];
 
+function getStableAvatar(doctor) {
+  // Always use the doctor's own image if they have one
+  if (doctor.image && doctor.image.trim()) return doctor.image;
+  // Stable fallback — never random, always same for same doctor
+  const numericId = typeof doctor.id === 'number'
+    ? doctor.id
+    : parseInt((doctor._id || '0').replace(/\D/g, '').slice(-4), 10) || 0;
+  return fallbackAvatars[numericId % fallbackAvatars.length];
+}
+
 function isMongoId(id) {
-  return /^[a-f\d]{24}$/i.test(id);
+  return id && /^[a-f\d]{24}$/i.test(String(id));
 }
 
 export default function DoctorProfile() {
@@ -47,13 +58,12 @@ export default function DoctorProfile() {
 
   if (!doctor) return <p className="text-center text-ink-400 py-24">Doctor not found.</p>;
 
-  // Support both DB shape and sample data shape
   const hospital = doctor.hospitalId && typeof doctor.hospitalId === 'object'
     ? doctor.hospitalId
     : getSampleHospital(doctor.hospitalId);
 
   const award = doctor.award ? (awardDefinitions[doctor.award] || { title: doctor.award }) : null;
-  const avatar = doctor.image || getAvatarForIndex(Number(id) || 0) || avatars[0];
+  const avatar = getStableAvatar(doctor);
   const dayList = doctor.days ? doctor.days.split(',').map(d => dayLabels[d] || d) : [];
   const startTime = doctor.start || doctor.startTime || '08:00';
   const endTime = doctor.end || doctor.endTime || '17:00';
@@ -77,7 +87,13 @@ export default function DoctorProfile() {
         <div>
           <div className="flex items-start gap-5">
             <div className="relative w-24 h-24 rounded-full overflow-hidden bg-teal-100 shrink-0">
-              <img src={avatar} alt={doctor.name} className="w-full h-full object-cover" />
+              {avatar ? (
+                <img src={avatar} alt={doctor.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <UserRound size={36} className="text-teal-400" />
+                </div>
+              )}
               {award && (
                 <span className="absolute -bottom-1 -right-1 flex items-center justify-center w-7 h-7 rounded-full bg-gold-600 text-teal-950 ring-2 ring-white">
                   <Award size={14} />
